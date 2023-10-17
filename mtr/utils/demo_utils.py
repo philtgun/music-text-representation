@@ -13,8 +13,8 @@ from mtr.classification.model import ClassificationModel
 from mtr.triplet.model import TripletModel
 from mtr.contrastive.model import ContrastiveModel
 
-def get_model(framework, text_type, text_rep, arch='transformer', frontend='cnn', mix_type="cf", audio_rep="mel"):
-    save_dir = f"../mtr/{framework}/exp/{arch}_{frontend}_{mix_type}_{audio_rep}/{text_type}_{text_rep}"
+def get_model(framework, text_type, text_rep, arch='transformer', frontend='cnn', mix_type="cf", audio_rep="mel", path=".."):
+    save_dir = f"{path}/mtr/{framework}/exp/{arch}_{frontend}_{mix_type}_{audio_rep}/{text_type}_{text_rep}"
     config = OmegaConf.load(os.path.join(save_dir, "hparams.yaml"))
     audio_preprocessr = TFRep(
                 sample_rate= config.sr,
@@ -84,5 +84,6 @@ def get_model(framework, text_type, text_rep, arch='transformer', frontend='cnn'
         if k.startswith('module.'):
             state_dict[k[len("module."):]] = state_dict[k]
         del state_dict[k]              
+    del state_dict["text_encoder.embeddings.position_ids"]  # weird
     model.load_state_dict(state_dict) 
     return model, tokenizer, config
